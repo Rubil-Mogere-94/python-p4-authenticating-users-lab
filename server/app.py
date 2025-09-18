@@ -12,7 +12,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///app.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.json.compact = False
 
-migrate = Migrate(app, db, directory='server/migrations')
+migrate = Migrate(app, db)
 
 db.init_app(app)
 
@@ -51,29 +51,6 @@ class ShowArticle(Resource):
 api.add_resource(ClearSession, '/clear')
 api.add_resource(IndexArticle, '/articles')
 api.add_resource(ShowArticle, '/articles/<int:id>')
-
-@app.route('/login', methods=['POST'])
-def login():
-    username = request.json.get('username')
-    user = User.query.filter_by(username=username).first()
-    if user:
-        session['user_id'] = user.id
-        return make_response(jsonify(user.to_dict()), 200)
-    return make_response(jsonify({'message': 'Unauthorized'}), 401)
-
-@app.route('/logout', methods=['DELETE'])
-def logout():
-    session['user_id'] = None
-    return make_response('', 204)
-
-@app.route('/check_session', methods=['GET'])
-def check_session():
-    user_id = session.get('user_id')
-    if user_id:
-        user = User.query.filter_by(id=user_id).first()
-        if user:
-            return make_response(jsonify(user.to_dict()), 200)
-    return make_response(jsonify({}), 401)
 
 
 if __name__ == '__main__':
